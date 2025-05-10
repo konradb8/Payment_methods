@@ -17,7 +17,7 @@ public class PaymentMethodService {
 
         List<Order> sortedOrders = orders.stream()
                 .map(order -> new AbstractMap.SimpleEntry<>(order, scoreOrder(order)))
-                .sorted((a, b) -> b.getValue().compareTo(a.getValue())) // descending
+                .sorted((a, b) -> b.getValue().compareTo(a.getValue())) // desc
                 .map(Map.Entry::getKey)
                 .toList();
 
@@ -31,7 +31,7 @@ public class PaymentMethodService {
             // płacenie punktami
             if (points != null && points.getLimit().compareTo(orderVal) >= 0) {
                 BigDecimal reducedOrderVal = applyDiscount(orderVal, points.getDiscount());
-                methodMap.put(points.getId(), subtractFromLimit(points, reducedOrderVal)); // Zaktualizowany limit w methodMap
+                methodMap.put(points.getId(), subtractFromLimit(points, reducedOrderVal));
                 result.merge(points.getId(), reducedOrderVal, BigDecimal::add);
                 continue;
             }

@@ -32,8 +32,6 @@ class PaymentMethodServiceTest {
 
 
 
-
-
     @Test
     public void testOptimize_PromotionsAndPoints() {
         List<Method> methods = Arrays.asList(
@@ -76,7 +74,6 @@ class PaymentMethodServiceTest {
 
         Map<String, BigDecimal> result = service.optimize(orders, methods);
 
-        // 10% rabatu na 100.00 -> 90.00
         assertBigDecimalEquals(new BigDecimal("90.00"), result.get("mZysk"));
         assertEquals(1, result.size());
     }
@@ -95,7 +92,6 @@ class PaymentMethodServiceTest {
 
         Map<String, BigDecimal> result = service.optimize(orders, methods);
 
-        // 15% rabatu na 100.00 -> 85.00
         assertBigDecimalEquals(new BigDecimal("85.00"), result.get("PUNKTY"));
     }
 
@@ -114,7 +110,6 @@ class PaymentMethodServiceTest {
 
         Map<String, BigDecimal> result = service.optimize(orders, methods);
 
-        // 10% punktów (10.00), reszta po rabacie 90.00 - 10.00 = 80.00 płatne BosBankrut
         assertBigDecimalEquals(new BigDecimal("10.00"), result.get("PUNKTY"));
         assertBigDecimalEquals(new BigDecimal("80.00"), result.get("BosBankrut"));
     }
