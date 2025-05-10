@@ -5,7 +5,6 @@ import com.github.konradb8.payment_methods.model.Order;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class PaymentMethodService {
     public Map<String, BigDecimal> optimize(Collection<Order> orders, Collection<Method> methods) {
@@ -87,20 +86,6 @@ public class PaymentMethodService {
         int base = order.getValue().intValue();
         int promoBoost = order.getPromotions() != null ? order.getPromotions().size() * 10 : 0;
         return base + promoBoost;
-    }
-
-
-    // Pomocnicza funkcja – zwraca największą wartość oszczędności przy możliwej metodzie
-    private BigDecimal getMaxDiscountValue(Order order, Map<String, Method> methods) {
-        BigDecimal value = order.getValue();
-        List<String> promos = order.getPromotions();
-
-        return methods.values().stream()
-                .filter(m -> promos == null || promos.contains(m.getId()))
-                .filter(m -> m.getLimit().compareTo(value) >= 0)
-                .map(m -> value.subtract(applyDiscount(value, m.getDiscount())))
-                .max(BigDecimal::compareTo)
-                .orElse(BigDecimal.ZERO);
     }
 
     private Method anyMethodWithLimit(Collection<Method> methods, BigDecimal remain) {
