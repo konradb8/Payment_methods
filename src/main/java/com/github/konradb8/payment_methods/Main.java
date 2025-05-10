@@ -8,8 +8,7 @@ import com.github.konradb8.payment_methods.util.JsonLoader;
 
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -22,8 +21,8 @@ public class Main {
         String ordersPath = args[0];
         String methodsPath = args[1];
 
-        List<Order> orders = JsonLoader.loadJson(ordersPath, new TypeReference<List<Order>>() {});
-        List<Method> methods = JsonLoader.loadJson(methodsPath, new TypeReference<List<Method>>() {});
+        Collection<Order> orders = JsonLoader.loadJson(ordersPath, new TypeReference<List<Order>>() {});
+        Collection<Method> methods = JsonLoader.loadJson(methodsPath, new TypeReference<List<Method>>() {});
 
 //        System.out.println("Orders:");
 //        orders.forEach(System.out::println);
@@ -31,9 +30,13 @@ public class Main {
 //        methods.forEach(System.out::println);
 
         PaymentMethodService paymentMethodService = new PaymentMethodService();
-        Map<String, BigDecimal> result = paymentMethodService.optimize(orders, methods);
+        try {
+            Map<String, BigDecimal> result = paymentMethodService.optimize(orders, methods);
+            result.forEach((k, v) -> System.out.println(k + ": " + v));
+        }catch(Exception e) {
+            System.out.println("Błąd: " + e.getMessage() );
+        }
 
-        result.forEach((k, v) -> System.out.println(k + ": " + v));
 
 
 

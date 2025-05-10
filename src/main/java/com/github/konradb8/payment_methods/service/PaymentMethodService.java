@@ -5,9 +5,10 @@ import com.github.konradb8.payment_methods.model.Order;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class PaymentMethodService {
-    public Map<String, BigDecimal> optimize(List<Order> orders, List<Method> methods) {
+    public Map<String, BigDecimal> optimize(Collection<Order> orders, Collection<Method> methods) {
         Map<String, BigDecimal> result = new HashMap<>();
         Map<String, Method> methodMap = new HashMap<>();
 
@@ -15,14 +16,20 @@ public class PaymentMethodService {
             methodMap.put(method.getId(), method);
         }
 
-        for (Order order : orders) {
+        List<Order> sortedOrders = orders.stream()
+                .map(order -> new AbstractMap.SimpleEntry<>(order, scoreOrder(order)))
+                .sorted((a, b) -> b.getValue().compareTo(a.getValue())) // descending
+                .map(Map.Entry::getKey)
+                .toList();
+
+        for (Order order : sortedOrders) {
             BigDecimal orderVal = order.getValue();
             List<String> orderPromotions = order.getPromotions();
 
 
             Method points = methodMap.get("PUNKTY");
 
-            // Płacenie punktami
+            // płacenie punktami
             if (points != null && points.getLimit().compareTo(orderVal) >= 0) {
                 BigDecimal reducedOrderVal = applyDiscount(orderVal, points.getDiscount());
                 methodMap.put(points.getId(), subtractFromLimit(points, reducedOrderVal)); // Zaktualizowany limit w methodMap
@@ -40,7 +47,7 @@ public class PaymentMethodService {
                 if (promotedMethods.isPresent()) {
                     Method bestMethod = promotedMethods.get();
                     BigDecimal reducedOrderVal = applyDiscount(orderVal, bestMethod.getDiscount());
-                    methodMap.put(bestMethod.getId(), subtractFromLimit(bestMethod, reducedOrderVal)); // Zaktualizowany limit w methodMap
+                    methodMap.put(bestMethod.getId(), subtractFromLimit(bestMethod, reducedOrderVal));
                     result.merge(bestMethod.getId(), reducedOrderVal, BigDecimal::add);
                     continue;
                 }
@@ -50,11 +57,11 @@ public class PaymentMethodService {
             // częściowo punktami
             if (points != null && points.getLimit().compareTo(orderVal.multiply(BigDecimal.valueOf(0.1))) >= 0) {
 
-                BigDecimal usedPoints = points.getLimit().min(orderVal);
                 BigDecimal reduced = orderVal.multiply(BigDecimal.valueOf(0.9));
+                BigDecimal usedPoints = points.getLimit().min(orderVal);
 
-                subtractFromLimit(points, usedPoints); // points = subtractFromLimit(points, usedPoints);
-                methodMap.put(points.getId(), points);
+
+                subtractFromLimit(points, usedPoints);
 
                 result.merge(points.getId(), usedPoints, BigDecimal::add);
 
@@ -76,7 +83,25 @@ public class PaymentMethodService {
         return result;
     }
 
+    private int scoreOrder(Order order) {
+        int base = order.getValue().intValue();
+        int promoBoost = order.getPromotions() != null ? order.getPromotions().size() * 10 : 0;
+        return base + promoBoost;
+    }
 
+
+    // Pomocnicza funkcja – zwraca największą wartość oszczędności przy możliwej metodzie
+    private BigDecimal getMaxDiscountValue(Order order, Map<String, Method> methods) {
+        BigDecimal value = order.getValue();
+        List<String> promos = order.getPromotions();
+
+        return methods.values().stream()
+                .filter(m -> promos == null || promos.contains(m.getId()))
+                .filter(m -> m.getLimit().compareTo(value) >= 0)
+                .map(m -> value.subtract(applyDiscount(value, m.getDiscount())))
+                .max(BigDecimal::compareTo)
+                .orElse(BigDecimal.ZERO);
+    }
 
     private Method anyMethodWithLimit(Collection<Method> methods, BigDecimal remain) {
         return methods.stream()
@@ -85,12 +110,9 @@ public class PaymentMethodService {
                 .orElseThrow(() -> new IllegalStateException("Brak dostępnej metody płatności dla kwoty: " + remain));
     }
 
-
     private Method subtractFromLimit(Method method, BigDecimal amount) {
-        BigDecimal newLimit = method.getLimit().subtract(amount);
-        method.setLimit(newLimit);
+        method.setLimit(method.getLimit().subtract(amount));
         return method;
-
     }
 
     private BigDecimal applyDiscount(BigDecimal value, int discount) {
