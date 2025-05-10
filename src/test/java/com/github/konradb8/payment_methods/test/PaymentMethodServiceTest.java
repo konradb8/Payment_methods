@@ -43,18 +43,18 @@ class PaymentMethodServiceTest {
         );
 
         List<Order> orders = Arrays.asList(
-                o("ORDER1", 100.0, "mZysk"),            // płaci mZysk (10% zniżki)
-                o("ORDER2", 200.0, "BosBankrut"),       // płaci BosBankrut (5%)
-                o("ORDER3", 150.0, "mZysk", "BosBankrut"), // mZysk nie ma limitu, BosBankrut tak -> BosBankrut (5%)
-                o("ORDER4", 50.0)                       // płaci PUNKTY
+                o("ORDER1", 100.0, "mZysk"),
+                o("ORDER2", 200.0, "BosBankrut"),
+                o("ORDER3", 150.0, "mZysk", "BosBankrut"),
+                o("ORDER4", 50.0)
         );
 
         Map<String, BigDecimal> result = service.optimize(orders, methods);
 
         assertEquals(3, result.size());
-        assertBigDecimalEquals(new BigDecimal("165.00"), result.get("mZysk"));       //
-        assertBigDecimalEquals(new BigDecimal("190.00"), result.get("BosBankrut")); // 200 * 0.95
-        assertBigDecimalEquals(new BigDecimal("100.00"), result.get("PUNKTY"));     // 50 * 0.85
+        assertBigDecimalEquals(new BigDecimal("165.00"), result.get("mZysk"));
+        assertBigDecimalEquals(new BigDecimal("190.00"), result.get("BosBankrut"));
+        assertBigDecimalEquals(new BigDecimal("100.00"), result.get("PUNKTY"));
     }
 
 

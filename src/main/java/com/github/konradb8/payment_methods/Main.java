@@ -21,8 +21,10 @@ public class Main {
         String ordersPath = args[0];
         String methodsPath = args[1];
 
-        Collection<Order> orders = JsonLoader.loadJson(ordersPath, new TypeReference<List<Order>>() {});
-        Collection<Method> methods = JsonLoader.loadJson(methodsPath, new TypeReference<List<Method>>() {});
+        Collection<Order> orders = JsonLoader.loadJson(ordersPath, new TypeReference<>() {
+        });
+        Collection<Method> methods = JsonLoader.loadJson(methodsPath, new TypeReference<>() {
+        });
 
 //        System.out.println("Orders:");
 //        orders.forEach(System.out::println);
