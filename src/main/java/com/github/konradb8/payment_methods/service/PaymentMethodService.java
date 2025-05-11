@@ -25,7 +25,6 @@ public class PaymentMethodService {
             BigDecimal orderVal = order.getValue();
             List<String> orderPromotions = order.getPromotions();
 
-
             Method points = methodMap.get("PUNKTY");
 
             // płacenie punktami
@@ -72,7 +71,7 @@ public class PaymentMethodService {
                 continue;
             }
 
-            // brak metod odpowiednich
+            // brak odpowiednich metod
             Method any = anyMethodWithLimit(methodMap.values(), orderVal);
             methodMap.put(any.getId(), subtractFromLimit(any, orderVal));
             result.merge(any.getId(), orderVal, BigDecimal::add);

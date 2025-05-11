@@ -14,7 +14,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
 
         if(args.length < 2) {
-            System.err.println("To start application 2 json files are needed");
+            System.err.println("Należy przekazać 2 pliki json");
             return;
         }
 
@@ -25,11 +25,6 @@ public class Main {
         });
         Collection<Method> methods = JsonLoader.loadJson(methodsPath, new TypeReference<>() {
         });
-
-//        System.out.println("Orders:");
-//        orders.forEach(System.out::println);
-//        System.out.println("Methods:");
-//        methods.forEach(System.out::println);
 
         PaymentMethodService paymentMethodService = new PaymentMethodService();
         try {

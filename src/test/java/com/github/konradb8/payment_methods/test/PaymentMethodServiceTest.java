@@ -55,10 +55,6 @@ class PaymentMethodServiceTest {
         assertBigDecimalEquals(new BigDecimal("100.00"), result.get("PUNKTY"));
     }
 
-
-
-
-
     @Test
     void testOptimize_promotedMethod() {
         PaymentMethodService service = new PaymentMethodService();
